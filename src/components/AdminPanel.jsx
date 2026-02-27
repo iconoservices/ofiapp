@@ -275,9 +275,10 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
 
                                 <div className="flex gap-2">
                                     <button onClick={async () => {
-                                        if (userProfile.id === 'master') return alert('Clave maestra protegida.');
+                                        if (selectedProfileId === 'master') return alert('Clave maestra protegida.');
+                                        if (userProfile.id !== 'master' && selectedProfileId !== userProfile.id) return alert('Solo el Maestro puede cambiar claves de otros.');
                                         if (password.length < 4) return alert('Demasiado corta');
-                                        await updateDoc(doc(db, 'access_codes', userProfile.id), { code: password });
+                                        await updateDoc(doc(db, 'access_codes', selectedProfileId), { code: password });
                                         alert('Clave guardada.'); setPassword('');
                                     }} className="flex-1 h-14 bg-slate-100 text-slate-400 font-black text-[9px] uppercase tracking-widest rounded-2xl">Cambiar Contraseña</button>
                                     <button onClick={handleLogin} className="flex-1 h-14 bg-dark text-white font-black text-[9px] uppercase tracking-widest rounded-2xl shadow-lg">Cambiar Usuario</button>
