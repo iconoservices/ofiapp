@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3B82F6;
+  --color-secondary: #FF6B35;
+  --color-background: #F0F9FF;
+  --color-whatsapp: #25D366;
+  --color-dark: #1E293B;
+
+  --radius-xl: 12px;
+}
+
+@layer base {
+  :root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--color-dark);
+    background-color: var(--color-background);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+}
+
+@utility btn-primary {
+  @apply bg-primary text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+@utility btn-secondary {
+  @apply bg-secondary text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+@utility btn-whatsapp {
+  @apply bg-whatsapp text-white font-bold py-2 px-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2;
+}
+
+@utility card {
+  @apply bg-white p-4 rounded-xl shadow-sm border border-slate-100;
+}
+
+@utility badge-ofrezco {
+  @apply bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider;
+}
+
+@utility badge-busco {
+  @apply bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wider;
+}
+
+@utility input-field {
+  @apply w-full p-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+}
+
+@utility select-field {
+  @apply w-full p-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+}
