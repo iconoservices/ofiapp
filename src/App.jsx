@@ -174,7 +174,7 @@ function App() {
   }, [lastScrollY]);
 
   return (
-    <div className="min-h-screen bg-background pb-32 max-w-md mx-auto shadow-2xl bg-white relative font-sans">
+    <div className="min-h-screen bg-background pb-32 lg:max-w-6xl md:max-w-3xl sm:max-w-xl max-w-md mx-auto shadow-2xl bg-white relative font-sans">
       <div className={`sticky top-0 z-[100] bg-white transition-transform duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <Header onAdminClick={() => setShowAdminLogin(true)} isAdmin={isAdmin} userProfile={userProfile} />
 
@@ -232,29 +232,31 @@ function App() {
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sé el primero en publicar aquí.</p>
           </div>
         ) : (
-          filteredPosts.map((post, index) => {
-            const showAd = (index + 1) % 5 === 0;
-            const adIndex = Math.floor(index / 5) % currentAds.length;
-            const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredPosts.map((post, index) => {
+              const showAd = (index + 1) % 6 === 0;
+              const adIndex = Math.floor(index / 5) % currentAds.length;
+              const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
 
-            return (
-              <React.Fragment key={post.id}>
-                <PostCard
-                  post={post}
-                  onReport={handleReport}
-                  onDelete={handleDeletePost}
-                  onEdit={() => {
-                    setEditingPost(post);
-                    setShowPostForm(true);
-                  }}
-                  isAdmin={isAdmin}
-                  isOwner={JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
-                  onComment={() => { }}
-                />
-                {showAd && ad && <AdCard ad={ad} />}
-              </React.Fragment>
-            );
-          })
+              return (
+                <React.Fragment key={post.id}>
+                  <PostCard
+                    post={post}
+                    onReport={handleReport}
+                    onDelete={handleDeletePost}
+                    onEdit={() => {
+                      setEditingPost(post);
+                      setShowPostForm(true);
+                    }}
+                    isAdmin={isAdmin}
+                    isOwner={JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
+                    onComment={() => { }}
+                  />
+                  {showAd && ad && <AdCard ad={ad} />}
+                </React.Fragment>
+              );
+            })}
+          </div>
         )}
       </main>
 

@@ -24,11 +24,12 @@ const Filters = ({ filters, setFilters, isAdmin, config, onUpdateConfig }) => {
 
             <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" size={16} />
                     <div className="flex items-center gap-1">
                         <select
                             name="city"
-                            className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter flex-1"
+                            className="select-field pl-11 text-[10px] font-black h-[52px] bg-slate-50 border-none uppercase tracking-tighter flex-1 pr-8"
+                            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2394a3b8\' stroke-width=\'3\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\' /%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
                             value={filters.city}
                             onChange={handleChange}
                         >
@@ -51,11 +52,12 @@ const Filters = ({ filters, setFilters, isAdmin, config, onUpdateConfig }) => {
                     </div>
                 </div>
                 <div className="relative">
-                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" size={16} />
                     <div className="flex items-center gap-1">
                         <select
                             name="category"
-                            className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter flex-1"
+                            className="select-field pl-11 text-[10px] font-black h-[52px] bg-slate-50 border-none uppercase tracking-tighter flex-1 pr-8"
+                            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2394a3b8\' stroke-width=\'3\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\' /%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
                             value={filters.category}
                             onChange={handleChange}
                         >
