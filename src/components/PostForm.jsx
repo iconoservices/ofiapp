@@ -10,6 +10,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showOfflineSuccess, setShowOfflineSuccess] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const [formData, setFormData] = useState(editData ? {
         tipo: editData.tipo,
@@ -67,7 +68,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
         const postData = {
             ...formData,
             nombre: formData.nombre || 'Anónimo',
-            fecha_publicacion: serverTimestamp(),
+            fecha_publicacion: editData?.id ? editData.fecha_publicacion : serverTimestamp(),
             activo: true,
             vistas: 0,
             reportes: 0,
@@ -243,6 +244,11 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Tu Nombre o Negocio</label>
+                        <input type="text" name="nombre" placeholder="Ej: Juan Pérez o Carpintería Ofi" className="input-field h-14 text-sm font-bold uppercase tracking-tight" value={formData.nombre} onChange={handleChange} />
                     </div>
 
                     <div className="space-y-1">
