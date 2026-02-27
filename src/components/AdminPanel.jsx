@@ -103,7 +103,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                 ))}
                             </select>
                         </div>
-                        <input type="password" placeholder="CLAVE SEVRETA" className="input-field h-[70px] text-center text-xl font-black tracking-[0.5em] bg-slate-50 border-none rounded-[28px]" value={password} onChange={e => setPassword(e.target.value)} autoFocus />
+                        <input type="text" placeholder="CLAVE SECRETA" className="input-field h-[70px] text-center text-xl font-black tracking-[0.5em] bg-slate-50 border-none rounded-[28px]" value={password} onChange={e => setPassword(e.target.value)} autoFocus />
                         {error && <p className="text-red-500 text-[9px] font-black uppercase text-center animate-bounce italic">{error}</p>}
                         <button onClick={handleLogin} className="w-full btn-primary h-[70px] rounded-[28px] font-black text-lg shadow-xl shadow-primary/30 uppercase tracking-widest">Entrar Ahora</button>
                     </div>
@@ -269,7 +269,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                             <option value="master">💎 Admin Maestro</option>
                                             {accessCodes.filter(p => p.activo).map(p => <option key={p.id} value={p.id}>👤 {p.name}</option>)}
                                         </select>
-                                        <input type="password" placeholder="CLAVE" className="input-field h-14 text-center font-black tracking-widest bg-slate-50 border-none" value={password} onChange={e => setPassword(e.target.value)} />
+                                        <input type="text" placeholder="CLAVE" className="input-field h-14 text-center font-black tracking-widest bg-slate-50 border-none" value={password} onChange={e => setPassword(e.target.value)} />
                                     </div>
                                 </div>
 
@@ -279,7 +279,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                         if (password.length < 4) return alert('Demasiado corta');
                                         await updateDoc(doc(db, 'access_codes', userProfile.id), { code: password });
                                         alert('Clave guardada.'); setPassword('');
-                                    }} className="flex-1 h-14 bg-slate-100 text-slate-400 font-black text-[9px] uppercase tracking-widest rounded-2xl">Refrescar Clave</button>
+                                    }} className="flex-1 h-14 bg-slate-100 text-slate-400 font-black text-[9px] uppercase tracking-widest rounded-2xl">Cambiar Contraseña</button>
                                     <button onClick={handleLogin} className="flex-1 h-14 bg-dark text-white font-black text-[9px] uppercase tracking-widest rounded-2xl shadow-lg">Cambiar Usuario</button>
                                 </div>
                             </div>
