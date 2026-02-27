@@ -61,7 +61,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
         setError('');
 
         if (selectedProfileId === 'master') {
-            if (password === 'OFI2026') {
+            if (password === 'ofi2026') {
                 onLogin(true, { id: 'master', name: 'Dueño de Ofi', role: 'SUPERADMIN', permissions: { posts: true, ads: true, access: true, stats: true } });
                 setActiveModal(null);
                 setPassword('');
