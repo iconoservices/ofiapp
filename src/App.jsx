@@ -10,7 +10,8 @@ import {
   doc,
   increment
 } from 'firebase/firestore';
-import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings, User } from 'lucide-react';
+import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings, User, Edit } from 'lucide-react';
+import { CITIES, CATEGORIES } from './constants';
 import Header from './components/Header';
 import Filters from './components/Filters';
 import PostCard from './components/PostCard';
@@ -24,6 +25,7 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
   const [globalSettings, setGlobalSettings] = useState({ expirationDays: 30 });
+  const [config, setConfig] = useState({ cities: CITIES, categories: CATEGORIES });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('TRABAJO');
   const [dbError, setDbError] = useState(false);
@@ -40,6 +42,7 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [editingPost, setEditingPost] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -72,7 +75,13 @@ function App() {
       }
     });
 
-    return () => { unsubPosts(); unsubAds(); unsubSettings(); };
+    const unsubConfig = onSnapshot(doc(db, 'app_config', 'filters'), (docSnap) => {
+      if (docSnap.exists()) {
+        setConfig(docSnap.data());
+      }
+    });
+
+    return () => { unsubPosts(); unsubAds(); unsubSettings(); unsubConfig(); };
   }, []);
 
   const filteredPosts = useMemo(() => {
@@ -135,6 +144,17 @@ function App() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (window.confirm('¿Deseas eliminar este anuncio permanentemente?')) {
+      try {
+        await updateDoc(doc(db, 'postings', postId), { activo: false });
+        alert('Anuncio eliminado.');
+      } catch (err) {
+        console.error("Error deleting:", err);
+      }
+    }
+  };
+
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
 
@@ -169,7 +189,17 @@ function App() {
           )}
         </div>
 
-        {activeTab === 'TRABAJO' && <Filters filters={filters} setFilters={setFilters} />}
+        {activeTab === 'TRABAJO' && (
+          <Filters
+            filters={filters}
+            setFilters={setFilters}
+            isAdmin={isAdmin}
+            config={config}
+            onUpdateConfig={async (newConfig) => {
+              await setDoc(doc(db, 'app_config', 'filters'), newConfig);
+            }}
+          />
+        )}
       </div>
 
       {dbError && (
@@ -209,7 +239,18 @@ function App() {
 
             return (
               <React.Fragment key={post.id}>
-                <PostCard post={post} onReport={handleReport} onComment={() => { }} />
+                <PostCard
+                  post={post}
+                  onReport={handleReport}
+                  onDelete={handleDeletePost}
+                  onEdit={() => {
+                    setEditingPost(post);
+                    setShowPostForm(true);
+                  }}
+                  isAdmin={isAdmin}
+                  isOwner={JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
+                  onComment={() => { }}
+                />
                 {showAd && ad && <AdCard ad={ad} />}
               </React.Fragment>
             );
@@ -219,7 +260,10 @@ function App() {
 
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] transition-transform active:scale-95">
         <button
-          onClick={() => setShowPostForm(true)}
+          onClick={() => {
+            setEditingPost(null); // Ensure editingPost is null for new posts
+            setShowPostForm(true);
+          }}
           className="bg-secondary text-white font-black py-4 px-10 rounded-full shadow-[0_15px_30px_rgba(255,107,53,0.35)] flex items-center gap-2 whitespace-nowrap text-sm tracking-[0.2em] border-2 border-white/20 uppercase italic"
         >
           <Plus size={24} strokeWidth={4} />
@@ -227,7 +271,22 @@ function App() {
         </button>
       </div>
 
-      {showPostForm && <PostForm onClose={() => setShowPostForm(false)} isAdmin={isAdmin} onSuccess={() => { setShowPostForm(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+      {showPostForm && (
+        <PostForm
+          onClose={() => {
+            setShowPostForm(false);
+            setEditingPost(null);
+          }}
+          onSuccess={() => {
+            setShowPostForm(false);
+            setEditingPost(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          isAdmin={isAdmin}
+          editData={editingPost}
+          config={config}
+        />
+      )}
       {showAdminLogin && (
         <AdminPanel
           onClose={() => setShowAdminLogin(false)}

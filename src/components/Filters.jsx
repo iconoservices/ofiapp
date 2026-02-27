@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search, MapPin, Tag } from 'lucide-react';
-import { CITIES, CATEGORIES, TYPES } from '../constants';
+import { Search, MapPin, Tag, Edit, Plus, Trash2 } from 'lucide-react';
+import { TYPES } from '../constants';
 
-const Filters = ({ filters, setFilters }) => {
+const Filters = ({ filters, setFilters, isAdmin, config, onUpdateConfig }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -25,38 +25,64 @@ const Filters = ({ filters, setFilters }) => {
             <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                    <select
-                        name="city"
-                        className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter"
-                        value={filters.city}
-                        onChange={handleChange}
-                    >
-                        <option value="">Todas las ciudades</option>
-                        {CITIES.map(city => (
-                            <option key={city} value={city}>{city}</option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-1">
+                        <select
+                            name="city"
+                            className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter flex-1"
+                            value={filters.city}
+                            onChange={handleChange}
+                        >
+                            <option value="">Todas las ciudades</option>
+                            {config.cities.map(city => (
+                                <option key={city} value={city}>{city}</option>
+                            ))}
+                        </select>
+                        {isAdmin && (
+                            <button
+                                onClick={() => {
+                                    const name = window.prompt('Nueva Ciudad:');
+                                    if (name) onUpdateConfig({ ...config, cities: [...config.cities, name] });
+                                }}
+                                className="p-2 bg-slate-100 rounded-xl text-slate-400 hover:text-primary transition-colors"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="relative">
                     <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
-                    <select
-                        name="category"
-                        className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter"
-                        value={filters.category}
-                        onChange={handleChange}
-                    >
-                        <option value="">Categorías</option>
-                        {CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-1">
+                        <select
+                            name="category"
+                            className="select-field pl-9 text-xs font-bold h-[48px] bg-slate-50 border-none uppercase tracking-tighter flex-1"
+                            value={filters.category}
+                            onChange={handleChange}
+                        >
+                            <option value="">Categorías</option>
+                            {config.categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                        {isAdmin && (
+                            <button
+                                onClick={() => {
+                                    const name = window.prompt('Nueva Categoría:');
+                                    if (name) onUpdateConfig({ ...config, categories: [...config.categories, name] });
+                                }}
+                                className="p-2 bg-slate-100 rounded-xl text-slate-400 hover:text-primary transition-colors"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
             <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
                 Mostrando todas las ofertas de empleo
             </div>
-        </div>
+        </div >
     );
 };
 

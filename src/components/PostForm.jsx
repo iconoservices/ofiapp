@@ -1,29 +1,35 @@
 import React, { useState, useRef } from 'react';
-import { X, Send, AlertCircle, Camera, Loader2, ShieldCheck as ShieldIcon, Briefcase, WifiOff, CheckCircle2 } from 'lucide-react';
+import { X, Send, AlertCircle, Camera, Loader2, ShieldCheck as ShieldIcon, Briefcase, WifiOff, CheckCircle2, Tag } from 'lucide-react';
 import { db, storage } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { CITIES, CATEGORIES, TYPES } from '../constants';
 import imageCompression from 'browser-image-compression';
 
-const PostForm = ({ onClose, onSuccess, isAdmin }) => {
+const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cities: CITIES, categories: CATEGORIES } }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showOfflineSuccess, setShowOfflineSuccess] = useState(false);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState(editData ? {
+        tipo: editData.tipo,
+        nombre: editData.nombre,
+        ciudad: editData.ciudad,
+        categoria: editData.categoria,
+        descripcion: editData.descripcion,
+        whatsapp: editData.whatsapp,
+        disponibilidad: editData.disponibilidad || 'Inmediata'
+    } : {
         tipo: isAdmin ? TYPES.SERVICIO_OFI : TYPES.BUSCO_TRABAJADOR,
         nombre: '',
-        ciudad: CITIES[0],
-        categoria: CATEGORIES[0],
+        ciudad: config.cities[0],
+        categoria: config.categories[0],
         descripcion: '',
         whatsapp: '',
         disponibilidad: 'Inmediata'
     });
 
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [imagePreview, setImagePreview] = useState(editData?.imageUrl || null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef(null);
 
@@ -101,14 +107,21 @@ const PostForm = ({ onClose, onSuccess, isAdmin }) => {
             }
 
             // GUARDADO CON TIMEOUT FORZADO
-            const docRef = await Promise.race([
-                addDoc(collection(db, 'postings'), { ...postData, imageUrl }),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), 5000))
-            ]);
+            if (editData?.id) {
+                await Promise.race([
+                    updateDoc(doc(db, 'postings', editData.id), { ...postData, imageUrl: imageUrl || editData.imageUrl }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), 5000))
+                ]);
+            } else {
+                const docRef = await Promise.race([
+                    addDoc(collection(db, 'postings'), { ...postData, imageUrl }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), 5000))
+                ]);
 
-            if (docRef && docRef.id) {
-                const mine = JSON.parse(localStorage.getItem('my_posts') || '[]');
-                localStorage.setItem('my_posts', JSON.stringify([...mine, { id: docRef.id, createdAt: Date.now() }]));
+                if (docRef && docRef.id) {
+                    const mine = JSON.parse(localStorage.getItem('my_posts') || '[]');
+                    localStorage.setItem('my_posts', JSON.stringify([...mine, { id: docRef.id, createdAt: Date.now() }]));
+                }
             }
 
             setShowSuccess(true);
@@ -214,14 +227,21 @@ const PostForm = ({ onClose, onSuccess, isAdmin }) => {
                         <div className="space-y-1">
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">¿En qué ciudad?</label>
                             <select name="ciudad" className="select-field h-12 text-xs font-black uppercase" value={formData.ciudad} onChange={handleChange} required>
-                                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                <option value="" disabled>Selecciona ciudad</option>
+                                {config.cities.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">¿Rubro o Categoría?</label>
-                            <select name="categoria" className="select-field h-12 text-xs font-black uppercase" value={formData.categoria} onChange={handleChange} required>
-                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Categoría del oficio</label>
+                            <div className="relative">
+                                <Tag className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                                <select name="categoria" className="select-field h-14 pl-14 text-sm font-bold uppercase tracking-tight" value={formData.categoria} onChange={handleChange} required>
+                                    <option value="" disabled>Selecciona categoría</option>
+                                    {config.categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 

@@ -1,10 +1,10 @@
 import React from 'react';
-import { MessageCircle, Send, AlertTriangle, Eye, CheckCircle, ShieldCheck, Bookmark } from 'lucide-react';
+import { MessageCircle, Send, AlertTriangle, Eye, CheckCircle, ShieldCheck, Bookmark, Trash2, Edit2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { TYPES } from '../constants';
 
-const PostCard = ({ post, onReport, onComment }) => {
+const PostCard = ({ post, onReport, onComment, onDelete, onEdit, isAdmin, isOwner }) => {
     const {
         id,
         nombre,
@@ -34,6 +34,16 @@ const PostCard = ({ post, onReport, onComment }) => {
         const saved = JSON.parse(localStorage.getItem('saved_posts') || '[]');
         setIsSaved(saved.includes(id));
     }, [id]);
+
+    const canEdit = React.useMemo(() => {
+        if (isAdmin) return true;
+        if (!isOwner) return false;
+        const postTime = fecha_publicacion?.toDate().getTime() || Date.now();
+        const oneHour = 60 * 60 * 1000;
+        return (Date.now() - postTime) < oneHour;
+    }, [isAdmin, isOwner, fecha_publicacion]);
+
+    const showDelete = isAdmin || isOwner;
 
     const toggleSaved = (e) => {
         e.stopPropagation();
@@ -72,12 +82,19 @@ const PostCard = ({ post, onReport, onComment }) => {
                 <div className="space-y-1">
                     <div className="flex justify-between items-start">
                         <span className="text-[9px] font-black text-primary uppercase tracking-[0.15em]">{categoria}</span>
-                        <button
-                            onClick={() => onReport(id)}
-                            className="text-slate-200 hover:text-red-400 transition-colors"
-                        >
-                            <AlertTriangle size={14} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {showDelete && (
+                                <button onClick={() => onDelete(id)} className="text-slate-200 hover:text-red-500 transition-colors p-1">
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
+                            <button
+                                onClick={() => onReport(id)}
+                                className="text-slate-200 hover:text-red-400 transition-colors p-1"
+                            >
+                                <AlertTriangle size={14} />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -109,9 +126,23 @@ const PostCard = ({ post, onReport, onComment }) => {
                                 <span className="text-[9px] font-bold uppercase">Chat</span>
                             </button>
                         </div>
-                        <span className="text-[8px] font-black text-slate-300 uppercase italic">
-                            {timeAgo}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            {canEdit && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit();
+                                    }}
+                                    className="flex items-center gap-1 text-primary animate-pulse hover:scale-110 transition-transform"
+                                >
+                                    <Edit2 size={10} />
+                                    <span className="text-[8px] font-black uppercase tracking-tighter">Editar</span>
+                                </button>
+                            )}
+                            <span className="text-[8px] font-black text-slate-300 uppercase italic">
+                                {timeAgo}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="flex gap-2">
