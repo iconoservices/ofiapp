@@ -31,39 +31,43 @@ const Header = ({ onAdminClick, isAdmin, user, onLogin }) => {
                 <h1 className="text-lg sm:text-xl font-black text-dark tracking-tighter leading-none italic">OFI APP</h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                 {/* Regular User Profile / Login */}
-                {user ? (
-                    <div className="flex items-center gap-2 bg-slate-50 p-1 pr-3 rounded-full border border-slate-100 group transition-all">
-                        {user.photoURL ? (
-                            <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full shadow-sm" />
-                        ) : (
-                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white"><User size={16} /></div>
-                        )}
-                        <span className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[80px]">
-                            {user.displayName?.split(' ')[0]}
-                        </span>
-                        <button onClick={handleLogout} className="text-slate-300 hover:text-red-500 transition-colors ml-1">
-                            <LogOut size={12} />
+                <div className="flex items-center shadow-sm rounded-full bg-slate-50 border border-slate-100 p-0.5">
+                    {user ? (
+                        <div className="flex items-center gap-2 pr-3 transition-all">
+                            {user.photoURL ? (
+                                <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" />
+                            ) : (
+                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white"><User size={16} /></div>
+                            )}
+                            <span className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[70px] hidden sm:block">
+                                {user.displayName?.split(' ')[0]}
+                            </span>
+                            <button onClick={handleLogout} className="text-slate-300 hover:text-red-500 transition-colors">
+                                <LogOut size={12} />
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleGoogleLogin}
+                            className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-100 text-slate-500 rounded-full transition-all group"
+                        >
+                            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 group-hover:text-primary transition-colors">
+                                <User size={14} />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-widest">Mi Perfil</span>
                         </button>
-                    </div>
-                ) : (
-                    <button
-                        onClick={handleGoogleLogin}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-all group"
-                    >
-                        <LogIn size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Entrar</span>
-                    </button>
-                )}
+                    )}
+                </div>
 
-                {/* Admin Gear - Smaller and less prominent as requested */}
+                {/* Admin Gear - Small & Discrete */}
                 <button
                     onClick={onAdminClick}
-                    className={`p-2 rounded-xl transition-all ${isAdmin ? 'bg-primary/10 text-primary border-primary/20 border' : 'text-slate-300 hover:text-primary'}`}
+                    className={`p-2 rounded-xl transition-all ${isAdmin ? 'bg-primary/10 text-primary border-primary/20 border' : 'text-slate-200 hover:text-slate-400'}`}
                     aria-label="Admin Panel"
                 >
-                    <Settings size={18} strokeWidth={isAdmin ? 3 : 2} />
+                    <Settings size={18} strokeWidth={2} />
                 </button>
             </div>
         </header>
