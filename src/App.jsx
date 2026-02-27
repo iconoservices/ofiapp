@@ -10,7 +10,7 @@ import {
   doc,
   increment
 } from 'firebase/firestore';
-import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings } from 'lucide-react';
+import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings, User } from 'lucide-react';
 import Header from './components/Header';
 import Filters from './components/Filters';
 import PostCard from './components/PostCard';
@@ -23,6 +23,7 @@ import { TYPES } from './constants';
 function App() {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
+  const [globalSettings, setGlobalSettings] = useState({ expirationDays: 30 });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('TRABAJO');
   const [dbError, setDbError] = useState(false);
@@ -65,18 +66,31 @@ function App() {
       console.error("Firestore Ads Error:", error);
     });
 
-    return () => { unsubPosts(); unsubAds(); };
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
+      if (docSnap.exists()) {
+        setGlobalSettings(docSnap.data());
+      }
+    });
+
+    return () => { unsubPosts(); unsubAds(); unsubSettings(); };
   }, []);
 
   const filteredPosts = useMemo(() => {
-    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
     const savedIds = JSON.parse(localStorage.getItem('saved_posts') || '[]');
+    const myPostIds = JSON.parse(localStorage.getItem('my_posts') || '[]').map(p => p.id);
 
     return posts
       .filter(post => {
         const postTime = post.fecha_publicacion?.toDate().getTime() || Date.now();
-        if (postTime < thirtyDaysAgo) return false;
+        const expireDays = post.expirationDays !== undefined ? post.expirationDays : globalSettings.expirationDays;
+
+        if (expireDays !== 'indefinido') {
+          const cutoff = Date.now() - (expireDays * 24 * 60 * 60 * 1000);
+          if (postTime < cutoff) return false;
+        }
+
         if (activeTab === 'GUARDADOS') return savedIds.includes(post.id);
+        if (activeTab === 'MIS_ANUNCIOS') return myPostIds.includes(post.id);
         if (activeTab === 'TRABAJO') {
           if (post.tipo !== TYPES.BUSCO_TRABAJADOR) return false;
           const matchesQuery = post.descripcion.toLowerCase().includes(filters.query.toLowerCase()) ||
@@ -94,17 +108,25 @@ function App() {
         if (!a.verificado && b.verificado) return 1;
         return (b.fecha_publicacion?.seconds || 0) - (a.fecha_publicacion?.seconds || 0);
       });
-  }, [posts, filters, activeTab]);
+  }, [posts, filters, activeTab, globalSettings.expirationDays]);
 
   // Filtrar publicidad según la pestaña activa
   const currentAds = useMemo(() => {
     return ads.filter(ad => {
+      const adTime = ad.createdAt?.toDate().getTime() || Date.now();
+      const expireDays = ad.expirationDays !== undefined ? ad.expirationDays : globalSettings.expirationDays;
+
+      if (expireDays !== 'indefinido') {
+        const cutoff = Date.now() - (expireDays * 24 * 60 * 60 * 1000);
+        if (adTime < cutoff) return false;
+      }
+
       if (ad.ubicacion === 'GENERAL') return true;
       if (activeTab === 'TRABAJO' && ad.ubicacion === 'TRABAJO') return true;
       if (activeTab === 'SERVICIOS' && ad.ubicacion === 'SERVICIOS') return true;
       return false;
     });
-  }, [ads, activeTab]);
+  }, [ads, activeTab, globalSettings.expirationDays]);
 
   const handleReport = async (postId) => {
     if (window.confirm('¿Deseas reportar este anuncio?')) {
@@ -137,12 +159,13 @@ function App() {
         <Header onAdminClick={() => setShowAdminLogin(true)} isAdmin={isAdmin} userProfile={userProfile} />
 
         {/* Tabs Row moved inside the sticky container for synchronized hide/show */}
-        <div className="flex bg-white px-2 pt-4 border-b border-slate-50">
-          <button onClick={() => setActiveTab('TRABAJO')} className={`flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={18} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic">Buscadores</span></button>
-          <button onClick={() => setActiveTab('SERVICIOS')} className={`flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={18} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic">Servicios Ofi</span></button>
-          <button onClick={() => setActiveTab('GUARDADOS')} className={`flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={18} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic">Guardados</span></button>
+        <div className="flex bg-white px-2 pt-4 border-b border-slate-50 overflow-x-auto hide-scrollbar">
+          <button onClick={() => setActiveTab('TRABAJO')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Buscadores</span></button>
+          <button onClick={() => setActiveTab('SERVICIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Servicios</span></button>
+          <button onClick={() => setActiveTab('MIS_ANUNCIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'MIS_ANUNCIOS' ? 'border-indigo-400 text-indigo-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><User size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mis Posts</span></button>
+          <button onClick={() => setActiveTab('GUARDADOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Guardados</span></button>
           {isAdmin && (
-            <button onClick={() => setActiveTab('ADMIN')} className={`flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={18} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic">Mando</span></button>
+            <button onClick={() => setActiveTab('ADMIN')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mando</span></button>
           )}
         </div>
 

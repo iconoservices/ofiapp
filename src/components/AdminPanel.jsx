@@ -12,7 +12,8 @@ import {
     addDoc,
     serverTimestamp,
     getDocs,
-    where
+    where,
+    setDoc
 } from 'firebase/firestore';
 
 const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = false }) => {
@@ -25,6 +26,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
     const [ads, setAds] = useState([]);
     const [accessCodes, setAccessCodes] = useState([]);
     const [stats, setStats] = useState({ total: 0, views: 0 });
+    const [globalSettings, setGlobalSettings] = useState({ expirationDays: 30 });
 
     const [activeModal, setActiveModal] = useState(null); // 'AD', 'STAFF', 'CONFIG'
     const [newAd, setNewAd] = useState({ title: '', description: '', mediaUrl: '', link: '', ubicacion: 'GENERAL' });
@@ -53,7 +55,12 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
         const unsubAds = onSnapshot(query(collection(db, 'publicidad'), orderBy('createdAt', 'desc')), (snapshot) => {
             setAds(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
-        return () => { unsubPosts(); unsubAds(); };
+        const unsubSettings = onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
+            if (docSnap.exists()) {
+                setGlobalSettings(docSnap.data());
+            }
+        });
+        return () => { unsubPosts(); unsubAds(); unsubSettings(); };
     }, [isLoggedIn]);
 
     const handleLogin = async () => {
@@ -187,7 +194,20 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                     <span className="text-[8px] font-black text-primary uppercase">{post.categoria}</span>
                                     <p className="font-bold text-xs text-dark italic truncate leading-tight">"{post.descripcion}"</p>
                                 </div>
-                                <div className="flex gap-2 shrink-0">
+                                <div className="flex gap-2 shrink-0 items-center">
+                                    <select
+                                        className="select-field h-10 w-24 text-[9px] font-black uppercase text-center bg-slate-50 border-none px-1"
+                                        value={post.expirationDays || globalSettings.expirationDays}
+                                        onChange={async (e) => {
+                                            const val = e.target.value === 'indefinido' ? 'indefinido' : Number(e.target.value);
+                                            await updateDoc(doc(db, 'postings', post.id), { expirationDays: val });
+                                        }}
+                                    >
+                                        <option value={7}>1 Sem</option>
+                                        <option value={15}>15 Días</option>
+                                        <option value={30}>1 Mes</option>
+                                        <option value="indefinido">Sin Fin</option>
+                                    </select>
                                     <button onClick={async () => await updateDoc(doc(db, 'postings', post.id), { verificado: !post.verificado })} className={`p-4 rounded-2xl border transition-all ${post.verificado ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-50 text-slate-200 border-slate-100'}`}><CheckCircle size={20} /></button>
                                     <button onClick={async () => { if (window.confirm('Delete?')) await deleteDoc(doc(db, 'postings', post.id)) }} className="p-4 bg-red-50 text-red-500 rounded-2xl"><Trash2 size={20} /></button>
                                 </div>
@@ -206,7 +226,22 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                     <h5 className="font-black text-[10px] text-dark uppercase truncate">{ad.title}</h5>
                                     <span className="text-[8px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">{ad.ubicacion}</span>
                                 </div>
-                                <button onClick={async () => await deleteDoc(doc(db, 'publicidad', ad.id))} className="p-4 text-red-300 hover:text-red-500 transition-colors"><Trash2 size={20} /></button>
+                                <div className="flex gap-2 shrink-0 items-center">
+                                    <select
+                                        className="select-field h-10 w-24 text-[9px] font-black uppercase text-center bg-slate-50 border-none px-1"
+                                        value={ad.expirationDays || globalSettings.expirationDays}
+                                        onChange={async (e) => {
+                                            const val = e.target.value === 'indefinido' ? 'indefinido' : Number(e.target.value);
+                                            await updateDoc(doc(db, 'publicidad', ad.id), { expirationDays: val });
+                                        }}
+                                    >
+                                        <option value={7}>1 Sem</option>
+                                        <option value={15}>15 Días</option>
+                                        <option value={30}>1 Mes</option>
+                                        <option value="indefinido">Sin Fin</option>
+                                    </select>
+                                    <button onClick={async () => await deleteDoc(doc(db, 'publicidad', ad.id))} className="p-4 text-red-300 hover:text-red-500 transition-colors"><Trash2 size={20} /></button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -283,6 +318,28 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                     }} className="flex-1 h-14 bg-slate-100 text-slate-400 font-black text-[9px] uppercase tracking-widest rounded-2xl">Cambiar Contraseña</button>
                                     <button onClick={handleLogin} className="flex-1 h-14 bg-dark text-white font-black text-[9px] uppercase tracking-widest rounded-2xl shadow-lg">Cambiar Usuario</button>
                                 </div>
+
+                                {userProfile?.id === 'master' && (
+                                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center shadow-sm"><Clock size={14} className="text-blue-500" /></div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Reloj Global (Vencimiento)</span>
+                                        </div>
+                                        <select
+                                            className="select-field h-14 bg-slate-50 font-black text-[10px] uppercase border-none w-full"
+                                            value={globalSettings.expirationDays}
+                                            onChange={async (e) => {
+                                                const val = e.target.value === 'indefinido' ? 'indefinido' : Number(e.target.value);
+                                                await setDoc(doc(db, 'settings', 'global'), { expirationDays: val }, { merge: true });
+                                            }}
+                                        >
+                                            <option value={7}>1 Semana</option>
+                                            <option value={15}>15 Días</option>
+                                            <option value={30}>1 Mes</option>
+                                            <option value="indefinido">Indefinido</option>
+                                        </select>
+                                    </div>
+                                )}
                             </div>
                         )}
 

@@ -101,10 +101,15 @@ const PostForm = ({ onClose, onSuccess, isAdmin }) => {
             }
 
             // GUARDADO CON TIMEOUT FORZADO
-            await Promise.race([
+            const docRef = await Promise.race([
                 addDoc(collection(db, 'postings'), { ...postData, imageUrl }),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), 5000))
             ]);
+
+            if (docRef && docRef.id) {
+                const mine = JSON.parse(localStorage.getItem('my_posts') || '[]');
+                localStorage.setItem('my_posts', JSON.stringify([...mine, { id: docRef.id, createdAt: Date.now() }]));
+            }
 
             setShowSuccess(true);
             setTimeout(() => onSuccess(), 400);
