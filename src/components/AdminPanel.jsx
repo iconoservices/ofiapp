@@ -103,7 +103,7 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                                 ))}
                             </select>
                         </div>
-                        <input type="text" placeholder="CLAVE SECRETA" className="input-field h-[70px] text-center text-xl font-black tracking-[0.5em] bg-slate-50 border-none rounded-[28px]" value={password} onChange={e => setPassword(e.target.value)} autoFocus />
+                        <input type="password" placeholder="CLAVE SECRETA" className="input-field h-[70px] text-center text-xl font-black tracking-[0.5em] bg-slate-50 border-none rounded-[28px]" value={password} onChange={e => setPassword(e.target.value)} autoFocus />
                         {error && <p className="text-red-500 text-[9px] font-black uppercase text-center animate-bounce italic">{error}</p>}
                         <button onClick={handleLogin} className="w-full btn-primary h-[70px] rounded-[28px] font-black text-lg shadow-xl shadow-primary/30 uppercase tracking-widest">Entrar Ahora</button>
                     </div>
