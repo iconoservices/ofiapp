@@ -6,7 +6,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { CITIES, CATEGORIES, TYPES } from '../constants';
 import imageCompression from 'browser-image-compression';
 
-const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cities: CITIES, categories: CATEGORIES } }) => {
+const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cities: CITIES, categories: CATEGORIES }, userId = null }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showOfflineSuccess, setShowOfflineSuccess] = useState(false);
@@ -31,6 +31,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
     });
 
     const [imagePreview, setImagePreview] = useState(editData?.imageUrl || null);
+    const [imageFile, setImageFile] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef(null);
 
@@ -67,6 +68,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
 
         const postData = {
             ...formData,
+            userId: userId || editData?.userId || null,
             nombre: formData.nombre || 'Anónimo',
             fecha_publicacion: editData?.id ? editData.fecha_publicacion : serverTimestamp(),
             activo: true,

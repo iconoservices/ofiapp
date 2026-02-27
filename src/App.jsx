@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db } from './lib/firebase';
+import { auth, db } from './lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   query,
@@ -8,9 +9,10 @@ import {
   onSnapshot,
   updateDoc,
   doc,
-  increment
+  increment,
+  setDoc
 } from 'firebase/firestore';
-import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings, User, Edit } from 'lucide-react';
+import { Plus, Briefcase, ShieldCheck as ShieldIcon, Info, Bookmark as BookmarkIcon, AlertCircle, Settings, User, Edit, Sparkles, TrendingUp } from 'lucide-react';
 import { CITIES, CATEGORIES } from './constants';
 import Header from './components/Header';
 import Filters from './components/Filters';
@@ -41,8 +43,16 @@ function App() {
   const [activeCommentsPostId, setActiveCommentsPostId] = useState(null);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [user, setUser] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
+
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubAuth();
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -99,7 +109,9 @@ function App() {
         }
 
         if (activeTab === 'GUARDADOS') return savedIds.includes(post.id);
-        if (activeTab === 'MIS_ANUNCIOS') return myPostIds.includes(post.id);
+        if (activeTab === 'MIS_ANUNCIOS') {
+          return myPostIds.includes(post.id) || (user && post.userId === user.uid);
+        }
         if (activeTab === 'TRABAJO') {
           if (post.tipo !== TYPES.BUSCO_TRABAJADOR) return false;
           const matchesQuery = post.descripcion.toLowerCase().includes(filters.query.toLowerCase()) ||
@@ -174,96 +186,141 @@ function App() {
   }, [lastScrollY]);
 
   return (
-    <div className="min-h-screen bg-background pb-32 lg:max-w-6xl md:max-w-3xl sm:max-w-xl max-w-md mx-auto shadow-2xl bg-white relative font-sans">
-      <div className={`sticky top-0 z-[100] bg-white transition-transform duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        <Header onAdminClick={() => setShowAdminLogin(true)} isAdmin={isAdmin} userProfile={userProfile} />
+    <div className="min-h-screen bg-slate-50 relative font-sans">
+      <div className={`fixed top-0 left-0 right-0 z-[100] bg-white transform transition-transform duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full shadow-lg'}`}>
+        <div className="max-w-6xl mx-auto">
+          <Header
+            onAdminClick={() => setShowAdminLogin(true)}
+            isAdmin={isAdmin}
+            user={user}
+            onLogin={(u) => setUser(u)}
+          />
 
-        {/* Tabs Row moved inside the sticky container for synchronized hide/show */}
-        <div className="flex bg-white px-2 pt-4 border-b border-slate-50 overflow-x-auto hide-scrollbar">
-          <button onClick={() => setActiveTab('TRABAJO')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Buscadores</span></button>
-          <button onClick={() => setActiveTab('SERVICIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Servicios</span></button>
-          <button onClick={() => setActiveTab('MIS_ANUNCIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'MIS_ANUNCIOS' ? 'border-indigo-400 text-indigo-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><User size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mis Posts</span></button>
-          <button onClick={() => setActiveTab('GUARDADOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Guardados</span></button>
-          {isAdmin && (
-            <button onClick={() => setActiveTab('ADMIN')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mando</span></button>
+          {/* Tabs Row moved inside the sticky container for synchronized hide/show */}
+          <div className="flex bg-white px-2 pt-2 border-b border-slate-50 overflow-x-auto hide-scrollbar">
+            <button onClick={() => setActiveTab('TRABAJO')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Buscadores</span></button>
+            <button onClick={() => setActiveTab('SERVICIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Certificados</span></button>
+            <button onClick={() => setActiveTab('MIS_ANUNCIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'MIS_ANUNCIOS' ? 'border-indigo-400 text-indigo-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><User size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mis Posts</span></button>
+            <button onClick={() => setActiveTab('GUARDADOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Guardados</span></button>
+            {isAdmin && (
+              <button onClick={() => setActiveTab('ADMIN')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mando</span></button>
+            )}
+          </div>
+
+          {activeTab === 'TRABAJO' && (
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              isAdmin={isAdmin}
+              config={config}
+              onUpdateConfig={async (newConfig) => {
+                await setDoc(doc(db, 'app_config', 'filters'), newConfig);
+              }}
+            />
           )}
         </div>
-
-        {activeTab === 'TRABAJO' && (
-          <Filters
-            filters={filters}
-            setFilters={setFilters}
-            isAdmin={isAdmin}
-            config={config}
-            onUpdateConfig={async (newConfig) => {
-              await setDoc(doc(db, 'app_config', 'filters'), newConfig);
-            }}
-          />
-        )}
       </div>
 
-      {dbError && (
-        <div className="mx-4 mt-4 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3">
-          <AlertCircle className="text-amber-500 shrink-0" size={20} />
-          <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-tight italic">
-            Sin conexión. Los anuncios se sincronizarán al volver Internet.
-          </p>
-        </div>
-      )}
+      <div className="max-w-6xl mx-auto pt-[200px] lg:pt-[160px] pb-32 flex gap-6 px-4">
+        {/* Main Content Area */}
+        <main className="flex-1 space-y-6">
+          {dbError && (
+            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3">
+              <AlertCircle className="text-amber-500 shrink-0" size={20} />
+              <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-tight italic">
+                Sin conexión. Los anuncios se sincronizarán al volver Internet.
+              </p>
+            </div>
+          )}
 
-      <main className="p-4 space-y-5">
-        {activeTab === 'ADMIN' ? (
-          <AdminPanel
-            onClose={() => setActiveTab('TRABAJO')}
-            onLogin={(val, profile) => { setIsAdmin(val); setUserProfile(profile); }}
-            isLoggedIn={isAdmin}
-            userProfile={userProfile}
-            inlineMode={true}
-          />
-        ) : loading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4 font-sans">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest italic animate-pulse">Sincronizando Ofi...</p>
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-24 px-8 font-sans">
-            <div className="text-6xl mb-6 grayscale opacity-20">🌴</div>
-            <h3 className="text-xl font-black text-slate-700 italic tracking-tighter uppercase">Sin resultados</h3>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sé el primero en publicar aquí.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPosts.map((post, index) => {
-              const showAd = (index + 1) % 6 === 0;
-              const adIndex = Math.floor(index / 5) % currentAds.length;
-              const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
+          {activeTab === 'ADMIN' ? (
+            <AdminPanel
+              onClose={() => setActiveTab('TRABAJO')}
+              onLogin={(val, profile) => { setIsAdmin(val); setAdminProfile(profile); }}
+              isLoggedIn={isAdmin}
+              userProfile={adminProfile}
+              inlineMode={true}
+            />
+          ) : loading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4 font-sans">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest italic animate-pulse">Sincronizando Ofi...</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="text-center py-24 px-8 font-sans">
+              <div className="text-6xl mb-6 grayscale opacity-20">🌴</div>
+              <h3 className="text-xl font-black text-slate-700 italic tracking-tighter uppercase">Sin resultados</h3>
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sé el primero en publicar aquí.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+              {filteredPosts.map((post, index) => {
+                const showAd = (index + 1) % 4 === 0;
+                const adIndex = Math.floor(index / 4) % (currentAds.length || 1);
+                const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
 
-              return (
-                <React.Fragment key={post.id}>
-                  <PostCard
-                    post={post}
-                    onReport={handleReport}
-                    onDelete={handleDeletePost}
-                    onEdit={() => {
-                      setEditingPost(post);
-                      setShowPostForm(true);
-                    }}
-                    isAdmin={isAdmin}
-                    isOwner={JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
-                    onComment={() => { }}
-                  />
-                  {showAd && ad && <AdCard ad={ad} />}
-                </React.Fragment>
-              );
-            })}
+                return (
+                  <React.Fragment key={post.id || index}>
+                    <PostCard
+                      post={post}
+                      onReport={handleReport}
+                      onDelete={handleDeletePost}
+                      onEdit={() => {
+                        setEditingPost(post);
+                        setShowPostForm(true);
+                      }}
+                      isAdmin={isAdmin}
+                      isOwner={user?.uid === post.userId || JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
+                      onComment={() => { }}
+                    />
+                    {showAd && ad && <div className="sm:col-span-2 lg:col-span-2"><AdCard ad={ad} /></div>}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
+        </main>
+
+        {/* Desktop Sidebar for Paid Ads */}
+        <aside className="hidden lg:block w-[320px] space-y-6">
+          <div className="sticky top-[180px] space-y-6">
+            <div className="bg-slate-900 rounded-[32px] p-6 text-white overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 bg-primary/20 blur-3xl rounded-full"></div>
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                  <TrendingUp size={20} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Destacados</span>
+                </div>
+                <h4 className="text-xl font-black italic leading-tight uppercase tracking-tighter">Impulsa tu <br />Negocio Aquí</h4>
+                <p className="text-slate-400 text-xs font-medium leading-relaxed">Publicidad premium con impacto real en toda la región.</p>
+                <button className="w-full bg-white text-dark py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl active:scale-95">
+                  Ver Tarifas
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Sparkles size={14} className="text-amber-400" /> Publicidad Pagada
+                </span>
+              </div>
+              {currentAds.length > 0 ? (
+                currentAds.slice(0, 3).map(ad => (
+                  <AdCard key={ad.id} ad={ad} />
+                ))
+              ) : (
+                <AdCard /> // Shows default ad space
+              )}
+            </div>
           </div>
-        )}
-      </main>
+        </aside>
+      </div>
 
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] transition-transform active:scale-95">
         <button
           onClick={() => {
-            setEditingPost(null); // Ensure editingPost is null for new posts
+            setEditingPost(null);
             setShowPostForm(true);
           }}
           className="bg-secondary text-white font-black py-4 px-10 rounded-full shadow-[0_15px_30px_rgba(255,107,53,0.35)] flex items-center gap-2 whitespace-nowrap text-sm tracking-[0.2em] border-2 border-white/20 uppercase italic"
@@ -287,21 +344,23 @@ function App() {
           isAdmin={isAdmin}
           editData={editingPost}
           config={config}
+          userId={user?.uid}
         />
       )}
+
       {showAdminLogin && (
         <AdminPanel
           onClose={() => setShowAdminLogin(false)}
           onLogin={(val, profile) => {
             setIsAdmin(val);
-            setUserProfile(profile);
+            setAdminProfile(profile);
             if (val) {
               setShowAdminLogin(false);
               setActiveTab('ADMIN');
             }
           }}
           isLoggedIn={isAdmin}
-          userProfile={userProfile}
+          userProfile={adminProfile}
         />
       )}
     </div>

@@ -9,7 +9,7 @@ const Filters = ({ filters, setFilters, isAdmin, config, onUpdateConfig }) => {
     };
 
     return (
-        <div className="bg-white/95 backdrop-blur-md p-4 space-y-4 sticky top-[125px] z-40 border-b border-slate-100 shadow-sm animate-in fade-in duration-300">
+        <div className="bg-white/95 backdrop-blur-md p-3 space-y-3 border-b border-slate-100 shadow-sm animate-in fade-in duration-300">
             <div className="relative group">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                 <input
