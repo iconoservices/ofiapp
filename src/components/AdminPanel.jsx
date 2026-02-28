@@ -346,9 +346,11 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                         {/* MODAL AD: Publicidad */}
                         {activeModal === 'AD' && (
                             <form onSubmit={async (e) => { e.preventDefault(); await addDoc(collection(db, 'publicidad'), { ...newAd, createdAt: serverTimestamp(), activo: true }); setActiveModal(null); }} className="space-y-4">
-                                <input type="text" placeholder="TÍTULO" className="input-field h-14 text-sm font-bold uppercase bg-slate-50 border-none" value={newAd.title} onChange={e => setNewAd({ ...newAd, title: e.target.value })} required />
-                                <input type="text" placeholder="LINK MEDIA (VIDEO/IMG)" className="input-field h-14 text-sm bg-slate-50 border-none" value={newAd.mediaUrl} onChange={e => setNewAd({ ...newAd, mediaUrl: e.target.value })} required />
-                                <select className="select-field h-14 text-xs font-black uppercase bg-slate-50 border-none" value={newAd.ubicacion} onChange={e => setNewAd({ ...newAd, ubicacion: e.target.value })}>
+                                <input type="text" placeholder="TÍTULO" className="input-field h-14 text-sm font-bold uppercase bg-slate-50 border-none px-6" value={newAd.title} onChange={e => setNewAd({ ...newAd, title: e.target.value })} required />
+                                <textarea placeholder="DESCRIPCIÓN (Referencia)" className="input-field h-32 py-4 text-sm bg-slate-50 border-none px-6 resize-none" value={newAd.description} onChange={e => setNewAd({ ...newAd, description: e.target.value })} required />
+                                <input type="text" placeholder="LINK MEDIA (VIDEO/IMG)" className="input-field h-14 text-sm bg-slate-50 border-none px-6" value={newAd.mediaUrl} onChange={e => setNewAd({ ...newAd, mediaUrl: e.target.value })} required />
+                                <input type="text" placeholder="LINK DE ACCIÓN (WA.ME/WEB)" className="input-field h-14 text-sm bg-slate-50 border-none px-6" value={newAd.link} onChange={e => setNewAd({ ...newAd, link: e.target.value })} />
+                                <select className="select-field h-14 text-xs font-black uppercase bg-slate-50 border-none px-6" value={newAd.ubicacion} onChange={e => setNewAd({ ...newAd, ubicacion: e.target.value })}>
                                     <option value="GENERAL">TODOS LADOS</option>
                                     <option value="TRABAJO">SOLO BOLSA</option>
                                     <option value="SERVICIOS">SOLO SERVICIOS</option>

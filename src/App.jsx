@@ -198,12 +198,12 @@ function App() {
 
           {/* Tabs Row moved inside the sticky container for synchronized hide/show */}
           <div className="flex bg-white px-2 pt-2 border-b border-slate-50 overflow-x-auto hide-scrollbar">
-            <button onClick={() => setActiveTab('TRABAJO')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Buscadores</span></button>
-            <button onClick={() => setActiveTab('SERVICIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Certificados</span></button>
-            <button onClick={() => setActiveTab('MIS_ANUNCIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'MIS_ANUNCIOS' ? 'border-indigo-400 text-indigo-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><User size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mis Posts</span></button>
-            <button onClick={() => setActiveTab('GUARDADOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Guardados</span></button>
+            <button id="tab-trabajadores" onClick={() => setActiveTab('TRABAJO')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'TRABAJO' ? 'border-primary text-primary font-black' : 'border-transparent text-slate-400 font-bold'}`}><Briefcase size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Buscadores</span></button>
+            <button id="tab-certificados" onClick={() => setActiveTab('SERVICIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'SERVICIOS' ? 'border-amber-400 text-amber-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><ShieldIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Certificados</span></button>
+            <button id="tab-mis-anuncios" onClick={() => setActiveTab('MIS_ANUNCIOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'MIS_ANUNCIOS' ? 'border-indigo-400 text-indigo-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><User size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mis Posts</span></button>
+            <button id="tab-guardados" onClick={() => setActiveTab('GUARDADOS')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'GUARDADOS' ? 'border-red-400 text-red-600 font-black' : 'border-transparent text-slate-400 font-bold'}`}><BookmarkIcon size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Guardados</span></button>
             {isAdmin && (
-              <button onClick={() => setActiveTab('ADMIN')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mando</span></button>
+              <button id="tab-mando" onClick={() => setActiveTab('ADMIN')} className={`min-w-[70px] flex-1 flex flex-col items-center gap-1 py-2 border-b-4 transition-all ${activeTab === 'ADMIN' ? 'border-slate-800 text-slate-800 font-black' : 'border-transparent text-slate-400 font-bold animate-pulse'}`}><Settings size={16} /><span className="text-[8px] sm:text-[9px] uppercase tracking-tighter italic whitespace-nowrap">Mando</span></button>
             )}
           </div>
 
@@ -221,7 +221,37 @@ function App() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto pt-[200px] lg:pt-[160px] pb-32 flex gap-6 px-4">
+      <div className="max-w-[1440px] mx-auto pt-[260px] lg:pt-[210px] pb-32 flex flex-col lg:flex-row gap-6 px-4">
+        {/* Left Sidebar for PC (New) */}
+        <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
+          <div className="sticky top-[190px] space-y-6">
+            <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+              <div className="flex items-center gap-2 text-indigo-500 mb-4">
+                <Info size={18} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Información</span>
+              </div>
+              <h4 className="text-xl font-black italic tracking-tighter leading-none mb-3">LA RED DE TRABAJO #1</h4>
+              <p className="text-slate-400 text-[11px] font-medium leading-relaxed">Conectamos miles de oportunidades diariamente en toda la Amazonía.</p>
+            </div>
+
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <TrendingUp size={14} className="text-primary" /> Sugeridos
+                </span>
+              </div>
+              {currentAds.length > 1 ? (
+                <AdCard ad={currentAds[1]} />
+              ) : (
+                <div className="bg-slate-100/50 rounded-[32px] p-8 border border-dashed border-slate-200 text-center">
+                  <Plus className="mx-auto text-slate-300 mb-2" size={24} />
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tu marca aquí</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+
         {/* Main Content Area */}
         <main className="flex-1 space-y-6">
           {dbError && (
@@ -281,9 +311,9 @@ function App() {
           )}
         </main>
 
-        {/* Desktop Sidebar for Paid Ads */}
-        <aside className="hidden lg:block w-[320px] space-y-6">
-          <div className="sticky top-[180px] space-y-6">
+        {/* Desktop Sidebar for Paid Ads (Right) */}
+        <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
+          <div className="sticky top-[190px] space-y-6">
             <div className="bg-slate-900 rounded-[32px] p-6 text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 bg-primary/20 blur-3xl rounded-full"></div>
               <div className="relative z-10 space-y-4">
@@ -319,6 +349,7 @@ function App() {
 
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] transition-transform active:scale-95">
         <button
+          id="btn-publicar"
           onClick={() => {
             setEditingPost(null);
             setShowPostForm(true);
