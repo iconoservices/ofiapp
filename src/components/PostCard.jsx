@@ -59,7 +59,7 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin,
     };
 
     return (
-        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex min-h-[185px] sm:min-h-[192px] h-auto ${post.pinned ? 'border-indigo-400 bg-indigo-50/5 shadow-xl shadow-indigo-100 ring-2 ring-indigo-200' : verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
+        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex h-44 sm:h-48 ${post.pinned ? 'border-indigo-400 bg-indigo-50/5 shadow-xl shadow-indigo-100 ring-2 ring-indigo-200' : verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
             {post.pinned && (
                 <div className="absolute -top-1 -right-1 bg-indigo-500 text-white p-2 rounded-bl-2xl shadow-lg z-20 animate-bounce">
                     <Pin size={12} fill="white" />
@@ -86,7 +86,7 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin,
             <div className={`flex-1 p-3 flex flex-col justify-between ${!imageUrl ? 'w-full' : ''}`}>
                 <div className="space-y-1">
                     <div className="flex justify-between items-start">
-                        <span className="text-[9px] font-black text-primary uppercase tracking-[0.15em]">{categoria}</span>
+                        <span className="text-[9px] font-black text-primary uppercase tracking-[0.15em] truncate whitespace-nowrap mr-2">{categoria}</span>
                         <div className="flex items-center gap-2">
                             {isAdmin && (
                                 <button onClick={(e) => { e.stopPropagation(); onPin(); }} className={`transition-colors p-1 ${post.pinned ? 'text-indigo-500' : 'text-slate-200 hover:text-indigo-400'}`}>
@@ -107,8 +107,8 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin,
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                        <h3 className="text-base font-black text-dark leading-tight italic uppercase tracking-tighter truncate">
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                        <h3 className="text-base font-black text-dark leading-tight italic uppercase tracking-tighter truncate whitespace-nowrap">
                             {nombre || 'Anónimo'}
                         </h3>
                         {verificado && <CheckCircle className="text-primary" size={14} fill="white" />}
