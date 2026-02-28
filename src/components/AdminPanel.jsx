@@ -121,9 +121,9 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
     }
 
     return (
-        <div className={`${inlineMode ? 'w-full h-full' : 'fixed inset-0 z-[200] bg-slate-50 flex flex-col'} font-sans relative`}>
+        <div className={`flex flex-col font-sans relative ${inlineMode ? 'w-full bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden min-h-[600px]' : 'fixed inset-0 z-[200] bg-slate-50'}`}>
             {/* Mini Profile Header */}
-            <div className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shrink-0 z-30 shadow-sm">
+            <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center shrink-0 z-30 shadow-sm">
                 <div className="flex items-center gap-3">
                     <div className="w-11 h-11 bg-dark rounded-2xl flex items-center justify-center text-white shadow-lg overflow-hidden shrink-0">
                         <UserCircle2 size={24} />
@@ -134,8 +134,8 @@ const AdminPanel = ({ onClose, onLogin, isLoggedIn, userProfile, inlineMode = fa
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setActiveModal('CONFIG')} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:text-dark transition-colors"><Settings2 size={20} /></button>
-                    <button onClick={() => onLogin(false, null)} className="p-3 bg-red-50 text-red-500 rounded-2xl"><LogOut size={20} /></button>
+                    <button onClick={() => setActiveModal('CONFIG')} className="p-3 bg-white text-slate-400 rounded-2xl border border-slate-100 hover:text-dark transition-colors"><Settings2 size={20} /></button>
+                    {!inlineMode && <button onClick={() => onLogin(false, null)} className="p-3 bg-red-50 text-red-500 rounded-2xl"><LogOut size={20} /></button>}
                 </div>
             </div>
 
