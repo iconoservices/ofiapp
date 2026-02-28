@@ -22,6 +22,7 @@ import CommentSection from './components/CommentSection';
 import AdminPanel from './components/AdminPanel';
 import AdCard from './components/AdCard';
 import UserAuth from './components/UserAuth';
+import UserProfileModal from './components/UserProfileModal';
 import { TYPES } from './constants';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
   const [adminProfile, setAdminProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
   // Detección de ciudad automática
@@ -212,7 +214,10 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <Header
             onAdminClick={() => setShowAdminLogin(true)}
-            onUserClick={() => setShowUserAuth(true)}
+            onUserClick={() => {
+              if (user) setShowUserProfile(true);
+              else setShowUserAuth(true);
+            }}
             isAdmin={isAdmin}
             user={user}
             onLogin={(u) => setUser(u)}
@@ -243,7 +248,7 @@ function App() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto pt-[260px] lg:pt-[210px] pb-32 flex flex-col lg:flex-row gap-6 px-4">
+      <div className="max-w-[1440px] mx-auto pt-[340px] lg:pt-[240px] pb-32 flex flex-col lg:flex-row gap-6 px-4">
         {/* Left Sidebar for PC (New) */}
         <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
           <div className="sticky top-[190px] space-y-6">
@@ -423,6 +428,19 @@ function App() {
           onLogin={(u) => {
             setUser(u);
             setShowUserAuth(false);
+          }}
+        />
+      )}
+
+      {showUserProfile && (
+        <UserProfileModal
+          user={user}
+          onClose={() => setShowUserProfile(false)}
+          onLogout={() => {
+            import('firebase/auth').then(({ signOut }) => {
+              signOut(auth);
+              setUser(null);
+            });
           }}
         />
       )}

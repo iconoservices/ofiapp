@@ -20,19 +20,16 @@ const Header = ({ onAdminClick, onUserClick, isAdmin, user, onLogin }) => {
                 {/* Regular User Profile / Login */}
                 <div className="flex items-center shadow-sm rounded-full bg-slate-50 border border-slate-100 p-0.5">
                     {user ? (
-                        <div className="flex items-center gap-2 pr-3 transition-all">
+                        <button onClick={onUserClick} className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition-all group">
                             {user.photoURL ? (
-                                <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" />
+                                <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full border-2 border-slate-200 shadow-sm object-cover" />
                             ) : (
                                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white"><User size={16} /></div>
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[70px] hidden sm:block">
-                                {user.displayName?.split(' ')[0]}
+                            <span className="text-[10px] font-black uppercase tracking-tighter truncate max-w-[70px] hidden sm:block group-hover:text-primary transition-colors">
+                                {user.displayName?.split(' ')[0] || 'PERFIL'}
                             </span>
-                            <button onClick={handleLogout} className="text-slate-300 hover:text-red-500 transition-colors">
-                                <LogOut size={12} />
-                            </button>
-                        </div>
+                        </button>
                     ) : (
                         <button
                             onClick={onUserClick}
