@@ -11,9 +11,21 @@ const Header = ({ onAdminClick, onUserClick, isAdmin, user, onLogin }) => {
 
     return (
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center shadow-sm">
-            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                <span className="text-xl sm:text-2xl animate-pulse">🌴</span>
-                <h1 className="text-lg sm:text-xl font-black text-dark tracking-tighter leading-none italic">OFI APP</h1>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0 cursor-pointer group select-none">
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-[14px] sm:rounded-2xl flex items-center justify-center shadow-md shadow-slate-200/60 border border-slate-100 group-hover:shadow-xl group-hover:shadow-primary/10 group-hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <span className="text-2xl sm:text-3xl relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 drop-shadow-sm">🌴</span>
+                    <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-primary/10 rounded-full blur-md group-hover:bg-primary/20 transition-colors"></div>
+                </div>
+                <div className="flex flex-col justify-center">
+                    <h1 className="text-xl sm:text-[22px] font-black tracking-tighter leading-none italic flex items-center">
+                        <span className="text-slate-800">OFI</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600 ml-[1px]">APP</span>
+                    </h1>
+                    <span className="text-[7.5px] sm:text-[8px] font-black uppercase tracking-[0.25em] text-slate-400 mt-0.5 group-hover:text-emerald-500 transition-colors">
+                        Bolsa Selva
+                    </span>
+                </div>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
