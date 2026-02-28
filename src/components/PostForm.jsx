@@ -128,7 +128,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
             }
 
             setShowSuccess(true);
-            setTimeout(() => onSuccess(), 400);
+            setTimeout(() => onSuccess(formData.tipo), 400);
 
         } catch (err) {
             console.error("Error en Submit:", err);
@@ -138,7 +138,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
             const pending = JSON.parse(localStorage.getItem('pending_posts') || '[]');
             localStorage.setItem('pending_posts', JSON.stringify([...pending, { ...postData, local: true }]));
 
-            setTimeout(() => onSuccess(), 1200);
+            setTimeout(() => onSuccess(formData.tipo), 1200);
         } finally {
             setLoading(false);
         }

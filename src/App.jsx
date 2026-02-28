@@ -479,10 +479,19 @@ function App() {
               setShowPostForm(false);
               setEditingPost(null);
             }}
-            onSuccess={() => {
+            onSuccess={(typePost) => {
               setShowPostForm(false);
               setEditingPost(null);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Cambiar a la pestaña correspondiente y resetear filtro de orden
+              if (typePost === TYPES.SERVICIO_OFI) {
+                setActiveTab('SERVICIOS');
+              } else {
+                setActiveTab('TRABAJO');
+              }
+              setSortMode('RECENT');
+              setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 100);
             }}
             isAdmin={isAdmin}
             editData={editingPost}
