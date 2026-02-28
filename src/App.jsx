@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { auth, db } from './lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
@@ -192,6 +192,19 @@ function App() {
 
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(280);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setHeaderHeight(entry.target.offsetHeight);
+      }
+    });
+    observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, [activeTab]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -210,7 +223,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 relative font-sans">
-      <div className={`fixed top-0 left-0 right-0 z-[100] bg-white transform transition-transform duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full shadow-lg'}`}>
+      <div ref={headerRef} className={`fixed top-0 left-0 right-0 z-[100] bg-white transform transition-transform duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full shadow-lg'}`}>
         <div className="max-w-6xl mx-auto">
           <Header
             onAdminClick={() => setShowAdminLogin(true)}
@@ -248,7 +261,7 @@ function App() {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto pt-[340px] lg:pt-[240px] pb-32 flex flex-col lg:flex-row gap-6 px-4">
+      <div style={{ paddingTop: `${headerHeight + 24}px` }} className="max-w-[1440px] mx-auto pb-32 flex flex-col lg:flex-row gap-6 px-4 transition-all duration-300">
         {/* Left Sidebar for PC (New) */}
         <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
           <div className="sticky top-[190px] space-y-6">
