@@ -1,10 +1,10 @@
 import React from 'react';
-import { MessageCircle, Send, AlertTriangle, Eye, CheckCircle, ShieldCheck, Bookmark, Trash2, Edit2, Clock } from 'lucide-react';
+import { MessageCircle, Send, AlertTriangle, Eye, CheckCircle, ShieldCheck, Bookmark, Trash2, Edit2, Clock, Pin } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { TYPES } from '../constants';
 
-const PostCard = ({ post, onReport, onComment, onDelete, onEdit, isAdmin, isOwner }) => {
+const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin, isOwner }) => {
     const {
         id,
         nombre,
@@ -59,7 +59,12 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, isAdmin, isOwne
     };
 
     return (
-        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex h-44 sm:h-48 ${verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
+        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex h-44 sm:h-48 ${post.pinned ? 'border-indigo-400 bg-indigo-50/5 shadow-xl shadow-indigo-100 ring-2 ring-indigo-200' : verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
+            {post.pinned && (
+                <div className="absolute -top-1 -right-1 bg-indigo-500 text-white p-2 rounded-bl-2xl shadow-lg z-20 animate-bounce">
+                    <Pin size={12} fill="white" />
+                </div>
+            )}
 
             {/* Media del Post - Al costadito (Left side) */}
             {imageUrl && (
@@ -83,6 +88,11 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, isAdmin, isOwne
                     <div className="flex justify-between items-start">
                         <span className="text-[9px] font-black text-primary uppercase tracking-[0.15em]">{categoria}</span>
                         <div className="flex items-center gap-2">
+                            {isAdmin && (
+                                <button onClick={(e) => { e.stopPropagation(); onPin(); }} className={`transition-colors p-1 ${post.pinned ? 'text-indigo-500' : 'text-slate-200 hover:text-indigo-400'}`}>
+                                    <Pin size={14} fill={post.pinned ? "currentColor" : "none"} />
+                                </button>
+                            )}
                             {showDelete && (
                                 <button onClick={() => onDelete(id)} className="text-slate-200 hover:text-red-500 transition-colors p-1">
                                     <Trash2 size={14} />

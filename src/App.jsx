@@ -47,6 +47,7 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminProfile, setAdminProfile] = useState(null);
   const [user, setUser] = useState(null);
+  const [sortMode, setSortMode] = useState('LOCATION'); // 'LOCATION' or 'RECENT'
   const [showUserAuth, setShowUserAuth] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
@@ -68,6 +69,16 @@ function App() {
       }
     };
     detectCity();
+  }, []);
+
+  // Persistencia de Admin
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem('admin_session');
+    if (savedAdmin) {
+      const parsed = JSON.parse(savedAdmin);
+      setIsAdmin(true);
+      setAdminProfile(parsed);
+    }
   }, []);
 
   useEffect(() => {
@@ -135,24 +146,40 @@ function App() {
         if (activeTab === 'MIS_ANUNCIOS') {
           return myPostIds.includes(post.id) || (user && post.userId === user.uid);
         }
+
+        // No filtramos por ciudad físicamente aquí, sino por tipo y categoría
         if (activeTab === 'TRABAJO') {
           if (post.tipo !== TYPES.BUSCO_TRABAJADOR) return false;
           const matchesQuery = post.descripcion.toLowerCase().includes(filters.query.toLowerCase()) ||
             post.categoria.toLowerCase().includes(filters.query.toLowerCase()) ||
             post.nombre.toLowerCase().includes(filters.query.toLowerCase());
-          const matchesCity = filters.city ? post.ciudad === filters.city : true;
           const matchesCategory = filters.category ? post.categoria === filters.category : true;
-          return matchesQuery && matchesCity && matchesCategory;
+          return matchesQuery && matchesCategory;
         } else {
           return post.tipo === TYPES.SERVICIO_OFI;
         }
       })
       .sort((a, b) => {
+        // 1. Pinned posts (Prioridad máxima)
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+
+        // 2. Location priority if in LOCATION mode
+        if (sortMode === 'LOCATION' && filters.city) {
+          const aInCity = a.ciudad === filters.city;
+          const bInCity = b.ciudad === filters.city;
+          if (aInCity && !bInCity) return -1;
+          if (!aInCity && bInCity) return 1;
+        }
+
+        // 3. Verified Priority
         if (a.verificado && !b.verificado) return -1;
         if (!a.verificado && b.verificado) return 1;
+
+        // 4. Date Priority (Most recent)
         return (b.fecha_publicacion?.seconds || 0) - (a.fecha_publicacion?.seconds || 0);
       });
-  }, [posts, filters, activeTab, globalSettings.expirationDays]);
+  }, [posts, filters, activeTab, globalSettings.expirationDays, sortMode]);
 
   // Filtrar publicidad según la pestaña activa
   const currentAds = useMemo(() => {
@@ -177,6 +204,10 @@ function App() {
       await updateDoc(doc(db, 'postings', postId), { reportes: increment(1) });
       alert('Reporte enviado.');
     }
+  };
+
+  const handlePin = async (postId, currentStatus) => {
+    await updateDoc(doc(db, 'postings', postId), { pinned: !currentStatus });
   };
 
   const handleDeletePost = async (postId) => {
@@ -306,7 +337,16 @@ function App() {
           {activeTab === 'ADMIN' ? (
             <AdminPanel
               onClose={() => setActiveTab('TRABAJO')}
-              onLogin={(val, profile) => { setIsAdmin(val); setAdminProfile(profile); }}
+              onLogin={(val, profile) => {
+                setIsAdmin(val);
+                setAdminProfile(profile);
+                if (val) {
+                  localStorage.setItem('admin_session', JSON.stringify(profile));
+                } else {
+                  localStorage.removeItem('admin_session');
+                  setActiveTab('TRABAJO');
+                }
+              }}
               isLoggedIn={isAdmin}
               userProfile={adminProfile}
               inlineMode={true}
@@ -316,38 +356,62 @@ function App() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest italic animate-pulse">Sincronizando Ofi...</p>
             </div>
-          ) : filteredPosts.length === 0 ? (
-            <div className="text-center py-24 px-8 font-sans">
-              <div className="text-6xl mb-6 grayscale opacity-20">🌴</div>
-              <h3 className="text-xl font-black text-slate-700 italic tracking-tighter uppercase">Sin resultados</h3>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sé el primero en publicar aquí.</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-              {filteredPosts.map((post, index) => {
-                const showAd = (index + 1) % 4 === 0;
-                const adIndex = Math.floor(index / 4) % (currentAds.length || 1);
-                const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
+            <>
+              {/* Sorting Bar */}
+              {(activeTab === 'TRABAJO' || activeTab === 'SERVICIOS') && filteredPosts.length > 0 && (
+                <div className="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
+                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mr-2 ml-1">Ordenar:</span>
+                  <button
+                    onClick={() => setSortMode('LOCATION')}
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm ${sortMode === 'LOCATION' ? 'bg-primary text-white shadow-primary/20 scale-105' : 'bg-white text-slate-400 border border-slate-100'}`}
+                  >
+                    📍 Cerca de mí
+                  </button>
+                  <button
+                    onClick={() => setSortMode('RECENT')}
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm ${sortMode === 'RECENT' ? 'bg-indigo-500 text-white shadow-indigo-200/50 scale-105' : 'bg-white text-slate-400 border border-slate-100'}`}
+                  >
+                    🕒 Lo más reciente
+                  </button>
+                </div>
+              )}
 
-                return (
-                  <React.Fragment key={post.id || index}>
-                    <PostCard
-                      post={post}
-                      onReport={handleReport}
-                      onDelete={handleDeletePost}
-                      onEdit={() => {
-                        setEditingPost(post);
-                        setShowPostForm(true);
-                      }}
-                      isAdmin={isAdmin}
-                      isOwner={user?.uid === post.userId || JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
-                      onComment={() => { }}
-                    />
-                    {showAd && ad && <div className="sm:col-span-2 lg:col-span-2"><AdCard ad={ad} /></div>}
-                  </React.Fragment>
-                );
-              })}
-            </div>
+              {filteredPosts.length === 0 ? (
+                <div className="text-center py-24 px-8 font-sans">
+                  <div className="text-6xl mb-6 grayscale opacity-20">🌴</div>
+                  <h3 className="text-xl font-black text-slate-700 italic tracking-tighter uppercase">Sin resultados</h3>
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Sé el primero en publicar aquí.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                  {filteredPosts.map((post, index) => {
+                    const showAd = (index + 1) % 4 === 0;
+                    const adIndex = Math.floor(index / 4) % (currentAds.length || 1);
+                    const ad = currentAds.length > 0 ? currentAds[adIndex] : null;
+
+                    return (
+                      <React.Fragment key={post.id || index}>
+                        <PostCard
+                          post={post}
+                          onReport={handleReport}
+                          onDelete={handleDeletePost}
+                          onEdit={() => {
+                            setEditingPost(post);
+                            setShowPostForm(true);
+                          }}
+                          onPin={() => handlePin(post.id, post.pinned)}
+                          isAdmin={isAdmin}
+                          isOwner={user?.uid === post.userId || JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
+                          onComment={() => { }}
+                        />
+                        {showAd && ad && <div className="sm:col-span-2 lg:col-span-2"><AdCard ad={ad} /></div>}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </main>
 
@@ -429,8 +493,11 @@ function App() {
               setIsAdmin(val);
               setAdminProfile(profile);
               if (val) {
+                localStorage.setItem('admin_session', JSON.stringify(profile));
                 setShowAdminLogin(false);
                 setActiveTab('ADMIN');
+              } else {
+                localStorage.removeItem('admin_session');
               }
             }}
             isLoggedIn={isAdmin}
