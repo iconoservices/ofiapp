@@ -3,22 +3,7 @@ import { Settings, LogIn, User, LogOut } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 
-const Header = ({ onAdminClick, isAdmin, user, onLogin }) => {
-    const handleGoogleLogin = async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            onLogin(result.user);
-        } catch (error) {
-            console.error("Login Error:", error);
-            if (error.code === 'auth/configuration-not-found') {
-                alert("Servicio de Google no habilitado en Firebase. Contacta al soporte.");
-            } else {
-                alert("Error al iniciar sesión: " + error.message);
-            }
-        }
-    };
-
+const Header = ({ onAdminClick, onUserClick, isAdmin, user, onLogin }) => {
     const handleLogout = () => {
         signOut(auth);
         onLogin(null);
@@ -50,7 +35,7 @@ const Header = ({ onAdminClick, isAdmin, user, onLogin }) => {
                         </div>
                     ) : (
                         <button
-                            onClick={handleGoogleLogin}
+                            onClick={onUserClick}
                             className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-100 text-slate-500 rounded-full transition-all group"
                         >
                             <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 group-hover:text-primary transition-colors">

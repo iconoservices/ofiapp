@@ -21,6 +21,7 @@ import PostForm from './components/PostForm';
 import CommentSection from './components/CommentSection';
 import AdminPanel from './components/AdminPanel';
 import AdCard from './components/AdCard';
+import UserAuth from './components/UserAuth';
 import { TYPES } from './constants';
 
 function App() {
@@ -42,10 +43,28 @@ function App() {
   const [showPostForm, setShowPostForm] = useState(false);
   const [activeCommentsPostId, setActiveCommentsPostId] = useState(null);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminProfile, setAdminProfile] = useState(null);
   const [user, setUser] = useState(null);
+  const [showUserAuth, setShowUserAuth] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+
+  // Detección de ciudad automática
+  useEffect(() => {
+    const detectCity = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        if (data.city) {
+          const matchedCity = CITIES.find(c => c.toLowerCase().includes(data.city.toLowerCase()));
+          if (matchedCity) {
+            setFilters(prev => ({ ...prev, city: matchedCity }));
+          }
+        }
+      } catch (error) {
+        console.error("Geo detect error:", error);
+      }
+    };
+    detectCity();
+  }, []);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (u) => {
@@ -191,6 +210,7 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <Header
             onAdminClick={() => setShowAdminLogin(true)}
+            onUserClick={() => setShowUserAuth(true)}
             isAdmin={isAdmin}
             user={user}
             onLogin={(u) => setUser(u)}
@@ -392,6 +412,16 @@ function App() {
           }}
           isLoggedIn={isAdmin}
           userProfile={adminProfile}
+        />
+      )}
+
+      {showUserAuth && (
+        <UserAuth
+          onClose={() => setShowUserAuth(false)}
+          onLogin={(u) => {
+            setUser(u);
+            setShowUserAuth(false);
+          }}
         />
       )}
     </div>
