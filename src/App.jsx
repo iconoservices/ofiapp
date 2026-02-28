@@ -160,11 +160,15 @@ function App() {
         }
       })
       .sort((a, b) => {
-        // 1. Pinned posts (Prioridad máxima)
+        // 1. Pinned posts (Prioridad máxima en cualquier modo)
         if (a.pinned && !b.pinned) return -1;
         if (!a.pinned && b.pinned) return 1;
 
-        // 2. Location priority if in LOCATION mode
+        // 2. Verified Priority (Excepto si estamos en modo RECENT puro quizás, pero preferible mantenerlo)
+        if (a.verificado && !b.verificado) return -1;
+        if (!a.verificado && b.verificado) return 1;
+
+        // 3. Mode Selection
         if (sortMode === 'LOCATION' && filters.city) {
           const aInCity = a.ciudad === filters.city;
           const bInCity = b.ciudad === filters.city;
@@ -172,11 +176,8 @@ function App() {
           if (!aInCity && bInCity) return 1;
         }
 
-        // 3. Verified Priority
-        if (a.verificado && !b.verificado) return -1;
-        if (!a.verificado && b.verificado) return 1;
-
-        // 4. Date Priority (Most recent)
+        // EXPLORE y RECENT se comportan similar en fecha, pero EXPLORE podría en el futuro ser aleatorio.
+        // Por ahora mantenemos la cronología como base de calidad.
         return (b.fecha_publicacion?.seconds || 0) - (a.fecha_publicacion?.seconds || 0);
       });
   }, [posts, filters, activeTab, globalSettings.expirationDays, sortMode]);
@@ -360,19 +361,25 @@ function App() {
             <>
               {/* Sorting Bar */}
               {(activeTab === 'TRABAJO' || activeTab === 'SERVICIOS') && filteredPosts.length > 0 && (
-                <div className="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
-                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mr-2 ml-1">Ordenar:</span>
+                <div className="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2 px-1">
+                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mr-2 shrink-0">Vistas:</span>
                   <button
                     onClick={() => setSortMode('LOCATION')}
-                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm ${sortMode === 'LOCATION' ? 'bg-primary text-white shadow-primary/20 scale-105' : 'bg-white text-slate-400 border border-slate-100'}`}
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm border ${sortMode === 'LOCATION' ? 'bg-primary text-white border-primary shadow-primary/20 scale-105' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
                   >
                     📍 Cerca de mí
                   </button>
                   <button
                     onClick={() => setSortMode('RECENT')}
-                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm ${sortMode === 'RECENT' ? 'bg-indigo-500 text-white shadow-indigo-200/50 scale-105' : 'bg-white text-slate-400 border border-slate-100'}`}
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm border ${sortMode === 'RECENT' ? 'bg-indigo-500 text-white border-indigo-500 shadow-indigo-200/50 scale-105' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
                   >
                     🕒 Lo más reciente
+                  </button>
+                  <button
+                    onClick={() => setSortMode('EXPLORE')}
+                    className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all whitespace-nowrap shadow-sm border ${sortMode === 'EXPLORE' ? 'bg-emerald-500 text-white border-emerald-500 shadow-emerald-200/50 scale-105' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
+                  >
+                    🌍 Explorar Todo
                   </button>
                 </div>
               )}
