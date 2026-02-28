@@ -28,6 +28,7 @@ import { TYPES } from './constants';
 function App() {
   const [posts, setPosts] = useState([]);
   const [ads, setAds] = useState([]);
+  const [selectedPostComments, setSelectedPostComments] = useState(null);
   const [globalSettings, setGlobalSettings] = useState({ expirationDays: 30 });
   const [config, setConfig] = useState({ cities: CITIES, categories: CATEGORIES });
   const [loading, setLoading] = useState(true);
@@ -410,7 +411,7 @@ function App() {
                           onPin={() => handlePin(post.id, post.pinned)}
                           isAdmin={isAdmin}
                           isOwner={user?.uid === post.userId || JSON.parse(localStorage.getItem('my_posts') || '[]').some(m => m.id === post.id)}
-                          onComment={() => { }}
+                          onComment={(id) => setSelectedPostComments(id)}
                         />
                         {showAd && ad && <div className="sm:col-span-2 lg:col-span-2"><AdCard ad={ad} /></div>}
                       </React.Fragment>
@@ -543,8 +544,21 @@ function App() {
               import('firebase/auth').then(({ signOut }) => {
                 signOut(auth);
                 setUser(null);
+                setIsAdmin(false);
+                setAdminProfile(null);
+                localStorage.removeItem('admin_session');
               });
             }}
+          />
+        )
+      }
+
+      {
+        selectedPostComments && (
+          <CommentSection
+            postId={selectedPostComments}
+            isAdmin={isAdmin}
+            onClose={() => setSelectedPostComments(null)}
           />
         )
       }
