@@ -59,7 +59,7 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin,
     };
 
     return (
-        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex h-44 sm:h-48 ${post.pinned ? 'border-indigo-400 bg-indigo-50/5 shadow-xl shadow-indigo-100 ring-2 ring-indigo-200' : verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
+        <div className={`card !p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border-2 transition-all relative flex min-h-[185px] sm:min-h-[192px] h-auto ${post.pinned ? 'border-indigo-400 bg-indigo-50/5 shadow-xl shadow-indigo-100 ring-2 ring-indigo-200' : verificado ? 'border-amber-400 bg-amber-50/10 shadow-lg shadow-amber-100' : 'border-slate-100'}`}>
             {post.pinned && (
                 <div className="absolute -top-1 -right-1 bg-indigo-500 text-white p-2 rounded-bl-2xl shadow-lg z-20 animate-bounce">
                     <Pin size={12} fill="white" />
@@ -149,7 +149,7 @@ const PostCard = ({ post, onReport, onComment, onDelete, onEdit, onPin, isAdmin,
                                     <span className="text-[8px] font-black uppercase tracking-tighter">Editar</span>
                                 </button>
                             )}
-                            <span className="text-[8px] font-black text-slate-300 uppercase italic">
+                            <span className="text-[8px] font-black text-slate-300 uppercase italic whitespace-nowrap shrink-0">
                                 {timeAgo}
                             </span>
                         </div>
