@@ -43,6 +43,8 @@ function App() {
   const [showPostForm, setShowPostForm] = useState(false);
   const [activeCommentsPostId, setActiveCommentsPostId] = useState(null);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminProfile, setAdminProfile] = useState(null);
   const [user, setUser] = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
   const [editingPost, setEditingPost] = useState(null);

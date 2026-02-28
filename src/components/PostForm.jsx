@@ -52,7 +52,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
         try {
             const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200 });
             setImageFile(compressedFile);
-        } catch (err) { setImageFile(file); }
+        } catch { setImageFile(file); }
     };
 
     const handleSubmit = async (e) => {
