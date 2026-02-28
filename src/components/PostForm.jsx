@@ -175,7 +175,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
 
     return (
         <div
-            className="fixed inset-0 z-[100] bg-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 font-sans text-left"
+            className="fixed inset-0 z-[100] bg-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 font-sans text-left overflow-hidden"
             onClick={onClose} // Cerrar al tocar el fondo
         >
             <div
@@ -191,7 +191,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
                     <button onClick={onClose} className="p-2 bg-slate-100 rounded-full text-slate-400"><X size={24} /></button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto pb-12">
+                <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto overflow-x-hidden pb-12 w-full">
                     {/* Botones de Modo */}
                     <div className="flex gap-2">
                         <button
@@ -226,7 +226,7 @@ const PostForm = ({ onClose, onSuccess, isAdmin, editData = null, config = { cit
                         <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">¿En qué ciudad?</label>
                             <select name="ciudad" className="select-field h-12 text-xs font-black uppercase" value={formData.ciudad} onChange={handleChange} required>

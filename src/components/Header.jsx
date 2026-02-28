@@ -23,7 +23,7 @@ const Header = ({ onAdminClick, onUserClick, isAdmin, user, onLogin }) => {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600 ml-[1px]">APP</span>
                     </h1>
                     <span className="text-[7.5px] sm:text-[8px] font-black uppercase tracking-[0.25em] text-slate-400 mt-0.5 group-hover:text-emerald-500 transition-colors">
-                        Bolsa Selva
+                        Trabajos Selva
                     </span>
                 </div>
             </div>
