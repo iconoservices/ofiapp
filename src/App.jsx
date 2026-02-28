@@ -264,7 +264,7 @@ function App() {
       <div style={{ paddingTop: `${headerHeight + 24}px` }} className="max-w-[1440px] mx-auto pb-32 flex flex-col lg:flex-row gap-6 px-4 transition-all duration-300">
         {/* Left Sidebar for PC (New) */}
         <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
-          <div className="sticky top-[190px] space-y-6">
+          <div style={{ top: `${headerHeight + 24}px` }} className="sticky space-y-6">
             <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
               <div className="flex items-center gap-2 text-indigo-500 mb-4">
                 <Info size={18} />
@@ -353,7 +353,7 @@ function App() {
 
         {/* Desktop Sidebar for Paid Ads (Right) */}
         <aside className="hidden lg:block w-[300px] shrink-0 space-y-6">
-          <div className="sticky top-[190px] space-y-6">
+          <div style={{ top: `${headerHeight + 24}px` }} className="sticky space-y-6">
             <div className="bg-slate-900 rounded-[32px] p-6 text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 bg-primary/20 blur-3xl rounded-full"></div>
               <div className="relative z-10 space-y-4">
@@ -401,63 +401,71 @@ function App() {
         </button>
       </div>
 
-      {showPostForm && (
-        <PostForm
-          onClose={() => {
-            setShowPostForm(false);
-            setEditingPost(null);
-          }}
-          onSuccess={() => {
-            setShowPostForm(false);
-            setEditingPost(null);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          isAdmin={isAdmin}
-          editData={editingPost}
-          config={config}
-          userId={user?.uid}
-        />
-      )}
+      {
+        showPostForm && (
+          <PostForm
+            onClose={() => {
+              setShowPostForm(false);
+              setEditingPost(null);
+            }}
+            onSuccess={() => {
+              setShowPostForm(false);
+              setEditingPost(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            isAdmin={isAdmin}
+            editData={editingPost}
+            config={config}
+            userId={user?.uid}
+          />
+        )
+      }
 
-      {showAdminLogin && (
-        <AdminPanel
-          onClose={() => setShowAdminLogin(false)}
-          onLogin={(val, profile) => {
-            setIsAdmin(val);
-            setAdminProfile(profile);
-            if (val) {
-              setShowAdminLogin(false);
-              setActiveTab('ADMIN');
-            }
-          }}
-          isLoggedIn={isAdmin}
-          userProfile={adminProfile}
-        />
-      )}
+      {
+        showAdminLogin && (
+          <AdminPanel
+            onClose={() => setShowAdminLogin(false)}
+            onLogin={(val, profile) => {
+              setIsAdmin(val);
+              setAdminProfile(profile);
+              if (val) {
+                setShowAdminLogin(false);
+                setActiveTab('ADMIN');
+              }
+            }}
+            isLoggedIn={isAdmin}
+            userProfile={adminProfile}
+          />
+        )
+      }
 
-      {showUserAuth && (
-        <UserAuth
-          onClose={() => setShowUserAuth(false)}
-          onLogin={(u) => {
-            setUser(u);
-            setShowUserAuth(false);
-          }}
-        />
-      )}
+      {
+        showUserAuth && (
+          <UserAuth
+            onClose={() => setShowUserAuth(false)}
+            onLogin={(u) => {
+              setUser(u);
+              setShowUserAuth(false);
+            }}
+          />
+        )
+      }
 
-      {showUserProfile && (
-        <UserProfileModal
-          user={user}
-          onClose={() => setShowUserProfile(false)}
-          onLogout={() => {
-            import('firebase/auth').then(({ signOut }) => {
-              signOut(auth);
-              setUser(null);
-            });
-          }}
-        />
-      )}
-    </div>
+      {
+        showUserProfile && (
+          <UserProfileModal
+            user={user}
+            onClose={() => setShowUserProfile(false)}
+            onLogout={() => {
+              import('firebase/auth').then(({ signOut }) => {
+                signOut(auth);
+                setUser(null);
+              });
+            }}
+          />
+        )
+      }
+    </div >
   );
 }
 
