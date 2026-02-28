@@ -25,8 +25,7 @@ const CommentSection = ({ postId, isAdmin, onClose }) => {
         const q = query(
             collection(db, 'comentarios'),
             where('postId', '==', postId),
-            where('activo', '==', true),
-            orderBy('fecha', 'desc')
+            where('activo', '==', true)
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -34,7 +33,12 @@ const CommentSection = ({ postId, isAdmin, onClose }) => {
                 id: doc.id,
                 ...doc.data()
             }));
-            setComments(docs);
+            // Ordenar manualmente si no hay índice
+            const sortedDocs = docs.sort((a, b) => (b.fecha?.seconds || 0) - (a.fecha?.seconds || 0));
+            setComments(sortedDocs);
+            setLoading(false);
+        }, (err) => {
+            console.error("Error cargando comentarios:", err);
             setLoading(false);
         });
 
